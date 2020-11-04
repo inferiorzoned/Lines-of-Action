@@ -5,10 +5,11 @@ class Piece:
     PADDING = 17
     OUTLINE = 1
 
-    def __init__(self, row, col, color):
+    def __init__(self, row, col, color, id):
         self.row = row
         self.col = col
         self.color = color
+        self.id = id
         self.x = 0
         self.y = 0
         self.calc_pos()
@@ -20,7 +21,7 @@ class Piece:
         
     def draw_piece(self, win):
         rad = SQUARE_SIZE//2 - self.PADDING
-        if self.color == WHITE:
+        if self.id == WHITEID:
             pg.draw.circle(win, BLACK, (self.x, self.y), rad + self.OUTLINE)    
         else:
             pg.draw.circle(win, WHITE, (self.x, self.y), rad + self.OUTLINE)
@@ -28,8 +29,8 @@ class Piece:
         pg.draw.circle(win, self.color, (self.x, self.y), rad)
 
     def update(self, r, c):
-        self.r = r
-        self.c = c
+        self.row = r
+        self.col = c
         self.calc_pos()
         
     
