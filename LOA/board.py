@@ -5,6 +5,7 @@ from .piece import *
 class Board:
     def __init__(self):
         self.boardList2d = []
+        self.simpleBoard = []
         self.blacks_left = self.whites_left = 12
         self.addPiecesToBoard()
         
@@ -21,12 +22,24 @@ class Board:
     def addPiecesToBoard(self):
         for r in range(ROWS):
             self.boardList2d.append([])
+            self.simpleBoard.append([])
             for c in range(COLS):
                 if r == 0 or r == ROWS-1:
-                    p = Piece(r, c, BLACK, BLACKID) if c != 0 and c != COLS-1 else -1
+                    if c!=0 and c!=COLS-1:
+                        p = Piece(r, c, BLACK, BLACKID)
+                        simplep = 'B'
+                    else:
+                        p = -1
+                        simplep = '_'        
                 else:
-                    p = Piece(r, c, WHITE, WHITEID) if c == 0 or c == COLS-1 else -1
+                    if c==0 or c==COLS-1:
+                        p = Piece(r, c, WHITE, WHITEID)
+                        simplep = 'W'
+                    else:
+                        p = -1
+                        simplep = '_'        
                 self.boardList2d[r].append(p)
+                self.simpleBoard[r].append(simplep)
     
     def drawUI(self, win):
         self.draw_checkBoard(win)
@@ -37,28 +50,28 @@ class Board:
                     p.draw_piece(win)
                     
     def move(self, piece, r, c):
-        # print(self)
+        self.simpleMove(piece.row, piece.col, r, c)
         self.boardList2d[piece.row][piece.col], self.boardList2d[r][c] = self.boardList2d[r][c], self.boardList2d[piece.row][piece.col]
-        # print(self)
         piece.update(r, c)
-        
     
-    def getValidMoves(self, p):
+    def simpleMove(self, pr, pc, r, c):
+        self.simpleBoard[pr][pc], self.simpleBoard[r][c] = self.simpleBoard[r][c], self.simpleBoard[pr][pc]
+        
+    def getValidMoves(self, r, c):
         validPositions = set()
         for direction in DIRECTIONS:
             dx = DIRX[direction]
             dy = DIRY[direction]
-            piecesinBothPaths = self.getPiecesinPath(direction, p.row, p.col)
-            if self.canJump(piecesinBothPaths, direction, p.row, p.col, p.id, dx, dy):
-                # print("here")
-                if self.getOpponentPiecesInPath(piecesinBothPaths, direction, p.row, p.col, p.id, dx, dy) == 0:
-                    validPositions.add((p.row + dx*piecesinBothPaths, p.col + dy*piecesinBothPaths))
+            piecesinBothPaths = self.getPiecesinPath(direction, r, c)
+            if self.canJump(piecesinBothPaths, direction, r, c, self.simpleBoard[r][c], dx, dy):
+                if self.getOpponentPiecesInPath(piecesinBothPaths, direction, r, c, self.simpleBoard[r][c], dx, dy) == 0:
+                    validPositions.add((r + dx*piecesinBothPaths, c + dy*piecesinBothPaths))
             
             dx = DIRX[direction+1]
             dy = DIRY[direction+1]
-            if self.canJump(piecesinBothPaths, direction+1, p.row, p.col, p.id, dx, dy):
-                if self.getOpponentPiecesInPath(piecesinBothPaths, direction+1, p.row, p.col, p.id, dx, dy) == 0:
-                    validPositions.add((p.row + dx*piecesinBothPaths, p.col + dy*piecesinBothPaths))
+            if self.canJump(piecesinBothPaths, direction+1, r, c, self.simpleBoard[r][c], dx, dy):
+                if self.getOpponentPiecesInPath(piecesinBothPaths, direction+1, r, c, self.simpleBoard[r][c], dx, dy) == 0:
+                    validPositions.add((r + dx*piecesinBothPaths, c + dy*piecesinBothPaths))
         return validPositions
     
     def getPiecesinPath(self, direction, r, c):
@@ -71,7 +84,7 @@ class Board:
         currRow = currRow + dx
         currCol = currCol + dy
         while withinBoard(currRow, currCol):
-            if self.boardList2d[currRow][currCol] != -1:
+            if self.simpleBoard[currRow][currCol] != '_':
                 numbers += 1
             currRow = currRow + dx
             currCol = currCol + dy
@@ -80,7 +93,7 @@ class Board:
     def canJump(self, jump, direction, currRow, currCol, id, dx, dy):
         r = currRow + dx*jump
         c = currCol + dy*jump
-        if withinBoard(r, c) and (self.boardList2d[r][c] == -1 or self.boardList2d[r][c].id != id):
+        if withinBoard(r, c) and (self.simpleBoard[r][c] == '_' or self.simpleBoard[r][c] != id):
             return True
         else: return False
     
@@ -89,7 +102,7 @@ class Board:
         r = currRow + dx
         c = currCol + dy
         while jump > 1:
-            if self.boardList2d[r][c] != -1 and self.boardList2d[r][c].id != id:
+            if self.simpleBoard[r][c] != '_' and self.simpleBoard[r][c] != id:
                 opponentPieces += 1
             r = r + dx
             c = c + dy
@@ -105,6 +118,7 @@ class Board:
         elif self.boardList2d[r][c].id == BLACKID:
             self.blacks_left -= 1
         self.boardList2d[r][c] = -1
+        self.simpleBoard[r][c] = '_'
         
     def winner(self):
         if self.whites_left == 1:
@@ -153,11 +167,9 @@ class Board:
         boardConfig = ""
         for r in range(ROWS):
             for c in range(COLS):
-                if self.boardList2d[r][c] == -1: p = '.'
-                elif self.boardList2d[r][c].id == BLACKID: p = 'b'
-                else: p = 'w'
+                if self.boardList2d[r][c] == -1: p = '_ '
+                elif self.boardList2d[r][c].id == BLACKID: p = 'B '
+                else: p = 'W '
                 boardConfig += p
             boardConfig += "\n"
         return boardConfig
-    
-    

@@ -6,12 +6,15 @@ WIDTH = HEIGHT = 960
 ROWS = COLS = 8
 SQUARE_SIZE = WIDTH//COLS
 
+AImode = True
+
 #COLORS
 CHECK1 = pg.Color("#07a93d")
 CHECK2 = pg.Color("#c1fa05")
 BLACK = pg.Color("#000000")
 WHITE = pg.Color("#ffffff")
 REDDIRECTION = pg.Color("#ff3838")
+BLUELINE = pg.Color("#0000ff")
 
 #ID
 BLACKID = 101

@@ -58,8 +58,19 @@ t4 = '''test4(1, 2, 3, 4, 5, 6, 7)'''
 t5 = '''test5()'''
 t6 = '''test6()'''
 
-print(timeit.timeit(setup=setup,stmt = t5, number = 1000000))
-print(timeit.timeit(setup=setup,stmt = t6, number = 1000000))
+# print(timeit.timeit(setup=setup,stmt = t5, number = 1000000))
+# print(timeit.timeit(setup=setup,stmt = t6, number = 1000000))
+
+a, b = (2, 5)
+print(a, b)
 
 
+abc = []
+for r in range(8):
+    abc.append([])
+    for c in range(8):
+        abc[r].append(2)
+print(abc)
 
+defg = [list(x) for x in abc]
+print(defg)
