@@ -1,6 +1,7 @@
 # import pygame as pg
 from pygame import display, draw
 import sys
+from time import sleep
 from .ai import *
 from .constants import BLACKID, WHITEID, SQUARE_SIZE, REDDIRECTION, BLUELINE, AImode
 from .board import Board
@@ -26,14 +27,21 @@ class Game:
     def update(self):
         self.board.drawUI(self.win)
         if self.selectedPiece is not None:
-            self.drawValidMoves(self.validMoves)    
-        if self.selectedPiece is None:
             hasWon, who = self.winner()
             if hasWon:
                 print(f"{who} has won the game!")
+                sleep(1.5)
                 sys.exit()
+            self.drawValidMoves(self.validMoves)    
+        if self.selectedPiece is None:
             if self.fromPos != None:
                 self.drawMoveLine(self.fromPos, self.toPos)
+            hasWon, who = self.winner()
+            if hasWon:
+                print(f"{who} has won the game!")
+                display.update()        
+                sleep(1.5)
+                sys.exit()
         display.update()
 
     def drawValidMoves(self, validMoves):
@@ -79,10 +87,11 @@ class Game:
             self.op = BLACKID
             self.update()
             if AImode: self.ai.AImove(self)
-            
+            print(self.board.whites_left, self.board.blacks_left)
         else:
             self.turn = BLACKID
             self.op = WHITEID
+            print(self.board.whites_left, self.board.blacks_left)
             
     def winner(self):
         return self.board.winner()

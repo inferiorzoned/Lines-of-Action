@@ -1,21 +1,22 @@
 # import pygame as pg
 from math import inf, hypot
+import sys
 from copy import deepcopy
-from .constants import ROWS, COLS, WHITEID, BLACKID
+from .constants import ROWS, COLS, WHITEID, BLACKID, pieceSquaretable
 from .board import Board
 
 class AI:
     def __init__(self):
         self.boardAI = Board()
-        self.depth = 4
+        self.depth = 3
         self.ownid = 'W'
         self.opid = 'B'
         pass
 
     def AImove(self, game):
         self.boardAI.simpleBoard = [list(x) for x in game.board.simpleBoard]
-        print(self.eval(self.getConfig()))
-        
+        print(self)
+    
         afterMoveBoard = self.alphaBetaMiniMax()
         printBoard(afterMoveBoard)
         
@@ -31,7 +32,6 @@ class AI:
         game.select(r0, c0)
         # game.update()
         game.select(r1, c1)
-        # print(self.eval(self.getConfig()))
 
     def getSuccessors(self, boardConfig, id):
         op = None
@@ -61,63 +61,85 @@ class AI:
         return boardConfig
     
     def alphaBetaMax(self, depth, boardConfig, alpha, beta):
-        # TODO or game over
-        if depth == 0:  
+        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
+        hasWon, who = self.boardAI.winner()
+        if depth == 0 or hasWon:  
+            # print("here")
             return self.eval(boardConfig), boardConfig 
         
-        v = -inf
+        maxv = -inf
         configs = self.getSuccessors(boardConfig, 'W')
         newBoard = None
         
         for possibleConfig in configs:
             val, confg = self.alphaBetaMin(depth-1, possibleConfig, alpha, beta)
+            if maxv < val:
+                maxv = val
+                newBoard = [list(x) for x in possibleConfig]
+                alpha = max(alpha, maxv)
+                if beta <= alpha: break
+        
+        # for possibleConfig in configs:
+        #     val, confg = self.alphaBetaMin(depth-1, possibleConfig, alpha, beta)
             
-            v = max(v, val)
+        #     maxv = max(maxv, val)
+        #     alpha = max(alpha, maxv)
             
-            if v > beta:
-                # return v, boardConfig
-                return v, confg
-            alpha = max(alpha, v)
-            newBoard = [list(x) for x in possibleConfig]
-        return v, newBoard
+        #     if beta <= alpha:
+        #         # return v, boardConfig
+        #         return maxv, boardConfig
+        #     # alpha = max(alpha, maxv)
+        #     newBoard = [list(x) for x in confg]
+        return maxv, newBoard
     
     def alphaBetaMin(self, depth, boardConfig, alpha, beta):
-        # TODO or game over
-        if depth == 0:  
+        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
+        hasWon, who = self.boardAI.winner()
+        if depth == 0 or hasWon:  
+            # print("here")
             return self.eval(boardConfig), boardConfig 
         
-        v = inf
+        minv = inf
         configs = self.getSuccessors(boardConfig, 'B')
         newBoard = None
         
         for possibleConfig in configs:
             val, confg = self.alphaBetaMax(depth-1, possibleConfig, alpha, beta)
-            v = min(v, val)
+            if minv > val:
+                minv = val
+                newBoard = [list(x) for x in possibleConfig]
+                beta = min(beta, minv)
+                if beta <= alpha: break
+        # for possibleConfig in configs:
+        #     val, confg = self.alphaBetaMax(depth-1, possibleConfig, alpha, beta)
+        #     minv = min(minv, val)
+        #     beta = min(beta, minv)
+        #     if beta <= alpha:
+        #         # return v, boardConfig
+        #         return minv, boardConfig
             
-            if v < alpha:
-                # return v, boardConfig
-                return v, confg
-            beta = min(beta, v)
-            newBoard = [list(x) for x in possibleConfig]
-        return v, newBoard
+        #     newBoard = [list(x) for x in confg]
+        return minv, newBoard
         
     
     def eval(self, boardConfig):
-        whitePieces = []
-        blackPieces = []
-        whiteX = whiteY = blackX = blackY = 0
-        posn = 0
-        for row in boardConfig:
-            for col in row:
-                if col == 'W': 
-                    whiteX = posn//ROWS
-                    whiteY = posn%ROWS
-                    whitePieces.append((whiteX, whiteY))
-                elif col == 'B':
-                    blackX = posn//ROWS
-                    blackY = posn%ROWS
-                    blackPieces.append((blackX, blackY))
-                posn += 1
+        # whitePieces = []
+        # blackPieces = []
+        # whiteX = whiteY = blackX = blackY = 0
+        # posn = 0
+        # for row in boardConfig:
+        #     for col in row:
+        #         if col == 'W': 
+        #             whiteX = posn//ROWS
+        #             whiteY = posn%ROWS
+        #             whitePieces.append((whiteX, whiteY))
+        #         elif col == 'B':
+        #             blackX = posn//ROWS
+        #             blackY = posn%ROWS
+        #             blackPieces.append((blackX, blackY))
+        #         posn += 1
+        whitePieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'W']
+        blackPieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'B']
         # -------------------------check winner-------------------------
         self.boardAI.simpleBoard = [list(x) for x in boardConfig]
         hasWon, who = self.boardAI.winner()
@@ -167,26 +189,31 @@ class AI:
         #         posn += 1
         # densityW = densityW/ whitePieces
         # densityB = densityB/ blackPieces
-        score += (densityB - densityW)*5
+        score += (densityB - densityW)*10
         # -------------------------calculate area-----------------------
-        # wx0 = wy1 = bx0 = by1 = -1
-        # wy0 = wx1 = by0 = bx1 = ROWS+1
-        # posn = 0
-        # for row in boardConfig:
-        #     for col in row:
-        #         if col == 'W':
-        #             wx0 = max(wx0, posn//ROWS)
-        #             wy0 = min(wy0, posn%ROWS)
-        #             wx1 = min(wx1, posn//ROWS)
-        #             wy1 = max(wy1, posn%ROWS)
-        #         elif col == 'B':
-        #             bx0 = max(bx0, posn//ROWS)
-        #             by0 = min(by0, posn%ROWS)
-        #             bx1 = min(bx1, posn//ROWS)
-        #             by1 = max(by1, posn%ROWS)
-        # areaA = abs(wx0-wx1) * abs(wy1-wy0)
-        # areaB = abs(bx0-bx1) * abs(by1-by0)
-        # score += (areaB - areaA)*2
+        wx0 = wy1 = bx0 = by1 = -1
+        wy0 = wx1 = by0 = bx1 = ROWS+1
+        posn = 0
+        for row in boardConfig:
+            for col in row:
+                if col == 'W':
+                    wx0 = max(wx0, posn//ROWS)
+                    wy0 = min(wy0, posn%ROWS)
+                    wx1 = min(wx1, posn//ROWS)
+                    wy1 = max(wy1, posn%ROWS)
+                elif col == 'B':
+                    bx0 = max(bx0, posn//ROWS)
+                    by0 = min(by0, posn%ROWS)
+                    bx1 = min(bx1, posn//ROWS)
+                    by1 = max(by1, posn%ROWS)
+        areaA = abs(wx0-wx1) * abs(wy1-wy0)
+        areaB = abs(bx0-bx1) * abs(by1-by0)
+        score += (areaB - areaA)*10
+        
+        # ---------------pieceSQuareTable--------------------------------
+        whitePieceVal = sum(pieceSquaretable[r][c] for (r, c) in whitePieces)
+        blackPieceVal = sum(pieceSquaretable[r][c] for (r, c) in blackPieces)
+        score += (whitePieceVal - blackPieceVal)*2
         
         return score
                 
@@ -208,10 +235,3 @@ def printBoard(config):
             str += config[r][c] + " "
         str += "\n"
     print(str)
-               
-               
-               
-               
-                
-                
-            

@@ -7,7 +7,7 @@ class Board:
     def __init__(self):
         self.boardList2d = []
         self.simpleBoard = []
-        self.blacks_left = self.whites_left = 12
+        self.blacks_left = self.whites_left = (ROWS - 2)*2
         self.addPiecesToBoard()
         
     def draw_checkBoard(self, win):
