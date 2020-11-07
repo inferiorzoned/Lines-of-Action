@@ -12,9 +12,9 @@ def mouseOnBoard(pos):
     row = y // SQUARE_SIZE
     col = x // SQUARE_SIZE
     return row, col
-
+# run = True
 def main():
-    
+    # global run
     run = True
     clk = time.Clock()
     game = Game(WIN)

@@ -1,8 +1,15 @@
 # import pygame as pg
 from pygame import display, draw
+import sys
 from .ai import *
 from .constants import BLACKID, WHITEID, SQUARE_SIZE, REDDIRECTION, BLUELINE, AImode
 from .board import Board
+
+# import sys, os, inspect
+# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# parentdir = os.path.dirname(currentdir)
+# sys.path.insert(0, parentdir)
+
 
 class Game:
     def __init__(self, win):
@@ -24,6 +31,7 @@ class Game:
             hasWon, who = self.winner()
             if hasWon:
                 print(f"{who} has won the game!")
+                sys.exit()
             if self.fromPos != None:
                 self.drawMoveLine(self.fromPos, self.toPos)
         display.update()

@@ -2,6 +2,9 @@ import timeit
 import numpy as np
 from timeit import Timer
 from copy import deepcopy
+from itertools import chain
+from collections import Counter
+from math import sqrt, hypot
 
 CHECK1 = 10
 CHECK2 = 20
@@ -122,6 +125,140 @@ def test17():
     blackPieces = sum(line.count(1) for line in X)
 # test17 much faster than test16
 
+def test18():
+    whiteX = whiteY = 0
+    for r in range(8):
+        for c in range(8):
+            if X[r][c] == 2:
+                whiteX += r
+                whiteY += c
+    # print(whiteY)
+    
+def test19():
+    # whiteX = sum(index*row.count(2) for index, row in enumerate(X))
+    whiteX = whiteY = 0
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == 2: 
+                whiteX += posn//8
+                whiteY += posn%8
+            posn += 1
+    # print(whiteX)
+# test19 better than test18
+
+x1 = 1.0
+y1 = 2.4
+x2 = 5
+y2 = 6
+def test20():
+    dist = sqrt((x2 - x1)**2 + (y2 - y1)**2)
+def test21():
+    dist = hypot(x2 - x1, y2 - y1)
+#test21 always better than test20
+
+def test22():
+    whitePieces = []
+    blackPieces = []
+    whiteX = whiteY = blackX = blackY = 0
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == 2: 
+                whiteX = posn//8
+                whiteY = posn%8
+                whitePieces.append((whiteX, whiteY))
+            elif col == 1:
+                blackX = posn//8
+                blackY = posn%8
+                blackPieces.append((blackX, blackY))
+            posn += 1
+    print((whitePieces))
+    whiteX = sum(r for (r, c) in whitePieces)
+    whiteY = sum(c for r, c in whitePieces)
+    blackX = sum(r for r, c in blackPieces)
+    blackY = sum(c for r, c in blackPieces)
+    print(whiteX)
+# test22()
+
+def test23():
+    whitePieces = []
+    blackPieces = []
+    whiteX = whiteY = blackX = blackY = 0
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == 2: 
+                whiteX = posn//8
+                whiteY = posn%8
+                whitePieces.append((whiteX, whiteY))
+            elif col == 1:
+                blackX = posn//8
+                blackY = posn%8
+                blackPieces.append((blackX, blackY))
+            posn += 1
+            
+    ROWS = 8
+    wx0 = wy1 = bx0 = by1 = -1
+    wy0 = wx1 = by0 = bx1 = 8+1
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == '2':
+                wx0 = max(wx0, posn//ROWS)
+                wy0 = min(wy0, posn%ROWS)
+                wx1 = min(wx1, posn//ROWS)
+                wy1 = max(wy1, posn%ROWS)
+            elif col == '1':
+                bx0 = max(bx0, posn//ROWS)
+                by0 = min(by0, posn%ROWS)
+                bx1 = min(bx1, posn//ROWS)
+                by1 = max(by1, posn%ROWS)
+def test24():
+    whitePieces = []
+    blackPieces = []
+    whiteX = whiteY = blackX = blackY = 0
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == 2: 
+                whiteX = posn//8
+                whiteY = posn%8
+                whitePieces.append((whiteX, whiteY))
+            elif col == 1:
+                blackX = posn//8
+                blackY = posn%8
+                blackPieces.append((blackX, blackY))
+            posn += 1
+            
+    wx0, wx1 = max(whitePieces)[0], min(whitePieces)[0]
+    wy1, wy0 = max(whitePieces)[1], min(whitePieces)[1]
+    bx0, bx1 = max(blackPieces)[0], min(blackPieces)[0]
+    by1, by0 = max(blackPieces)[1], min(blackPieces)[1]
+    
+def test25():
+    whitePieces = []
+    blackPieces = []
+    whiteX = whiteY = blackX = blackY = 0
+    posn = 0
+    for row in X:
+        for col in row:
+            if col == 2: 
+                whiteX = posn//8
+                whiteY = posn%8
+                whitePieces.append((whiteX, whiteY))
+            elif col == 1:
+                blackX = posn//8
+                blackY = posn%8
+                blackPieces.append((blackX, blackY))
+            posn += 1
+            
+    wx0, wx1 = tuple(map(max, zip(*whitePieces))) 
+    wy1, wy0 = tuple(map(min, zip(*whitePieces))) 
+    bx0, bx1 = tuple(map(max, zip(*whitePieces))) 
+    by1, by0 = tuple(map(min, zip(*whitePieces))) 
+# test23 better than test24 better test25
+
 setup = '''
 from __main__ import test1
 from __main__ import test2
@@ -140,6 +277,13 @@ from __main__ import test14
 from __main__ import test15
 from __main__ import test16
 from __main__ import test17
+from __main__ import test18
+from __main__ import test19
+from __main__ import test20
+from __main__ import test21
+from __main__ import test23
+from __main__ import test24
+from __main__ import test25
 '''
         
 t1 = '''test1()'''
@@ -159,8 +303,19 @@ t14 = '''test14()'''
 t15 = '''test15()'''
 t16 = '''test16()'''
 t17 = '''test17()'''
+t18 = '''test18()'''
+t19 = '''test19()'''
+t20 = '''test20()'''
+t21 = '''test21()'''
+t23 = '''test23()'''
+t24 = '''test24()'''
+t25 = '''test25()'''
 
-print(timeit.timeit(setup=setup,stmt = t16, number = 100000))
-print(timeit.timeit(setup=setup,stmt = t17, number = 100000))
-# print(timeit.timeit(setup=setup,stmt = t9, number = 10000))
+
+print(timeit.timeit(setup=setup,stmt = t23, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t24, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t25, number = 100000))
+
+
+
 

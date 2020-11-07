@@ -1,13 +1,13 @@
 # import pygame as pg
-from math import inf
+from math import inf, hypot
 from copy import deepcopy
-from .constants import ROWS, COLS
+from .constants import ROWS, COLS, WHITEID, BLACKID
 from .board import Board
 
 class AI:
     def __init__(self):
         self.boardAI = Board()
-        self.depth = 3
+        self.depth = 4
         self.ownid = 'W'
         self.opid = 'B'
         pass
@@ -103,11 +103,90 @@ class AI:
         
     
     def eval(self, boardConfig):
+        whitePieces = []
+        blackPieces = []
+        whiteX = whiteY = blackX = blackY = 0
+        posn = 0
+        for row in boardConfig:
+            for col in row:
+                if col == 'W': 
+                    whiteX = posn//ROWS
+                    whiteY = posn%ROWS
+                    whitePieces.append((whiteX, whiteY))
+                elif col == 'B':
+                    blackX = posn//ROWS
+                    blackY = posn%ROWS
+                    blackPieces.append((blackX, blackY))
+                posn += 1
+        # -------------------------check winner-------------------------
+        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
+        hasWon, who = self.boardAI.winner()
+        if who == WHITEID:
+            return 10000
+        elif who == BLACKID:
+            return -10000
         score = 0
-        
-        whitePieces = sum(line.count('W') for line in boardConfig)
-        blackPieces = sum(line.count('B') for line in boardConfig)
-        score += whitePieces - blackPieces
+        # ----------------------------check remaining pieces----------------------
+        NoofWhitePieces = len(whitePieces)
+        NoofBlackPieces = len(blackPieces)
+        score += (NoofWhitePieces - NoofBlackPieces)*10
+        # ----------------------------calculate density----------------------------
+        # whiteX = whiteY = blackX = blackY = 0
+        # posn = 0
+        whiteX = sum(r for (r, c) in whitePieces)
+        whiteY = sum(c for (r, c) in whitePieces)
+        blackX = sum(r for (r, c) in blackPieces)
+        blackY = sum(c for (r, c) in blackPieces)
+        # for row in boardConfig:
+        #     for col in row:
+        #         if col == 'W': 
+        #             whiteX += posn//ROWS
+        #             whiteY += posn%ROWS
+        #         elif col == 'B':
+        #             blackX += posn//ROWS
+        #             blackY += posn%ROWS
+        #         posn += 1
+        whiteCOMX = whiteX/ NoofWhitePieces
+        whiteCOMY = whiteY/ NoofWhitePieces
+        blackCOMX = blackX/ NoofBlackPieces
+        blackCOMY = blackY/ NoofBlackPieces
+        # densityW = densityB = 0
+        # posn = 0
+        densityW = sum(hypot(whiteCOMX-r, whiteCOMY-c) for (r, c) in whitePieces)/ NoofWhitePieces
+        densityB = sum(hypot(blackCOMX-r, blackCOMY-c) for (r, c) in blackPieces)/ NoofBlackPieces
+        # for row in boardConfig:
+        #     for col in row:
+        #         if col == 'W': 
+        #             whiteX = posn//ROWS
+        #             whiteY = posn%ROWS
+        #             densityW += hypot(whiteCOMX-whiteX, whiteCOMY-whiteY)
+        #         elif col == 'B':
+        #             blackX = posn//ROWS
+        #             blackY = posn%ROWS
+        #             densityB += hypot(blackCOMX-blackX, blackCOMY-blackY)
+        #         posn += 1
+        # densityW = densityW/ whitePieces
+        # densityB = densityB/ blackPieces
+        score += (densityB - densityW)*5
+        # -------------------------calculate area-----------------------
+        # wx0 = wy1 = bx0 = by1 = -1
+        # wy0 = wx1 = by0 = bx1 = ROWS+1
+        # posn = 0
+        # for row in boardConfig:
+        #     for col in row:
+        #         if col == 'W':
+        #             wx0 = max(wx0, posn//ROWS)
+        #             wy0 = min(wy0, posn%ROWS)
+        #             wx1 = min(wx1, posn//ROWS)
+        #             wy1 = max(wy1, posn%ROWS)
+        #         elif col == 'B':
+        #             bx0 = max(bx0, posn//ROWS)
+        #             by0 = min(by0, posn%ROWS)
+        #             bx1 = min(bx1, posn//ROWS)
+        #             by1 = max(by1, posn%ROWS)
+        # areaA = abs(wx0-wx1) * abs(wy1-wy0)
+        # areaB = abs(bx0-bx1) * abs(by1-by0)
+        # score += (areaB - areaA)*2
         
         return score
                 
