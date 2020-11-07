@@ -1,11 +1,11 @@
-import pygame as pg
-from LOA.constants import *
-from LOA.board import *
+# import pygame as pg
+from pygame import time, display, event, QUIT, MOUSEBUTTONDOWN, mouse
+from LOA.constants import FPS, WIDTH, HEIGHT, SQUARE_SIZE
 from LOA.game import *
 
 
-WIN = pg.display.set_mode((WIDTH, HEIGHT))
-pg.display.set_caption('Lines of Action')
+WIN = display.set_mode((WIDTH, HEIGHT))
+display.set_caption('Lines of Action')
 
 def mouseOnBoard(pos):
     x, y = pos
@@ -16,18 +16,18 @@ def mouseOnBoard(pos):
 def main():
     
     run = True
-    clk = pg.time.Clock()
+    clk = time.Clock()
     game = Game(WIN)
     
     while run:
         clk.tick(FPS)
 
-        for event in pg.event.get():
-            if event.type == pg.QUIT:
+        for e in event.get():
+            if e.type == QUIT:
                 run = False
             
-            if event.type == pg.MOUSEBUTTONDOWN:
-                pos = pg.mouse.get_pos()
+            if e.type == MOUSEBUTTONDOWN:
+                pos = mouse.get_pos()
                 row, col = mouseOnBoard(pos)
                 game.select(row, col)
         

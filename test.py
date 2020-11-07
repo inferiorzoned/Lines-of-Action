@@ -1,6 +1,7 @@
 import timeit
 import numpy as np
 from timeit import Timer
+from copy import deepcopy
 
 CHECK1 = 10
 CHECK2 = 20
@@ -42,6 +43,85 @@ def test6():
     x, y = y, x
 # both are almost equal
 
+X = [
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [2, 0, 0, 0, 0, 0, 0, 2],
+    [0, 1, 1, 1, 1, 1, 1, 0]
+]
+def test7():
+    Y = []
+    for r in range(len(X)):
+        Y.append([])
+        for c in range(len(X[r])):
+            Y[r].append(X[r][c])
+    # print(type(Y))
+    
+def test8():
+    Y = [list(x) for x in X]
+    # print(type(Y))
+# test8()
+    
+def test9():
+    Y = [[i for i in line] for line in X]
+    
+# test8 is whole lot faster than test7
+# test8 is faster than test9
+
+class A:
+    def __init__(self):
+        super().__init__()
+        pass
+    def inB(self):
+        Y = [list(x) for x in X]
+    def testCopy(self):
+        Y = [list(x) for x in X]
+a = A()
+def test10():
+    # a = A()
+    a.inB()
+
+def outB():
+    Y = [list(x) for x in X]
+def test11():
+    outB()
+# test11 slightly better than test10
+
+def test12():
+    Y = deepcopy(X)
+a = A()
+def test13():
+    # a = A()
+    a.testCopy()
+# test13 much faster than test12
+
+def test14():
+    initPositions = []
+    for r in range(8):
+        for c in range(8):
+            if X[r][c] == 2:
+                initPositions.append((r, c))
+def test15():
+    initPositions = [(r, c) for c in range(8) for r in range(8) if X[r][c] == 2]
+# test15 slightly better than test14
+
+def test16():
+    whitePieces = blackPieces = 0
+    for r in range(8):
+        for c in range(8):
+            if X[r][c] == 2:
+                whitePieces += 1
+            elif X[r][c] == 1:
+                blackPieces += 1
+def test17():
+    whitePieces = sum(line.count(2) for line in X)
+    blackPieces = sum(line.count(1) for line in X)
+# test17 much faster than test16
+
 setup = '''
 from __main__ import test1
 from __main__ import test2
@@ -49,6 +129,17 @@ from __main__ import test3
 from __main__ import test4
 from __main__ import test5
 from __main__ import test6
+from __main__ import test7
+from __main__ import test8
+from __main__ import test9
+from __main__ import test10
+from __main__ import test11
+from __main__ import test12
+from __main__ import test13
+from __main__ import test14
+from __main__ import test15
+from __main__ import test16
+from __main__ import test17
 '''
         
 t1 = '''test1()'''
@@ -57,20 +148,19 @@ t3 = '''test3(1, 2, 3, 4, 5, 6, 7)'''
 t4 = '''test4(1, 2, 3, 4, 5, 6, 7)'''
 t5 = '''test5()'''
 t6 = '''test6()'''
+t7 = '''test7()'''
+t8 = '''test8()'''
+t9 = '''test9()'''
+t10 = '''test10()'''
+t11 = '''test11()'''
+t12 = '''test12()'''
+t13 = '''test13()'''
+t14 = '''test14()'''
+t15 = '''test15()'''
+t16 = '''test16()'''
+t17 = '''test17()'''
 
-# print(timeit.timeit(setup=setup,stmt = t5, number = 1000000))
-# print(timeit.timeit(setup=setup,stmt = t6, number = 1000000))
+print(timeit.timeit(setup=setup,stmt = t16, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t17, number = 100000))
+# print(timeit.timeit(setup=setup,stmt = t9, number = 10000))
 
-a, b = (2, 5)
-print(a, b)
-
-
-abc = []
-for r in range(8):
-    abc.append([])
-    for c in range(8):
-        abc[r].append(2)
-print(abc)
-
-defg = [list(x) for x in abc]
-print(defg)

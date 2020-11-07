@@ -1,4 +1,5 @@
-import pygame as pg
+# import pygame as pg
+from pygame import draw
 from .constants import *
 from .piece import *
 
@@ -15,9 +16,9 @@ class Board:
             else: c1, c2 = CHECK2, CHECK1
             for c in range(COLS):
                 if c%2 == 0:
-                    pg.draw.rect(win, c1, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                    draw.rect(win, c1, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
                 else:
-                    pg.draw.rect(win, c2, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                    draw.rect(win, c2, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
                     
     def addPiecesToBoard(self):
         for r in range(ROWS):
@@ -129,22 +130,22 @@ class Board:
         firstBlackFound = firstWhiteFound = False
         for r in range(ROWS):
             for c in range(COLS):
-                if self.boardList2d[r][c] != -1:
-                    if self.boardList2d[r][c].id == BLACKID and not firstBlackFound:
+                if self.simpleBoard[r][c] != '_':
+                    if self.simpleBoard[r][c] == 'B' and not firstBlackFound:
                         BstartFromRow = r
                         BstartFromCol = c    
                         firstBlackFound = True
-                    elif self.boardList2d[r][c].id == WHITEID and not firstWhiteFound:
+                    elif self.simpleBoard[r][c] == 'W' and not firstWhiteFound:
                         WstartFromRow = r
                         WstartFromCol = c    
                         firstWhiteFound = True
                 if firstBlackFound and firstWhiteFound: break
             if firstBlackFound and firstWhiteFound: break
             
-        blacksConnected = self.winDFS(BstartFromRow, BstartFromCol, BLACKID)
+        blacksConnected = self.winDFS(BstartFromRow, BstartFromCol, 'B')
         if blacksConnected == self.blacks_left:
             return True, BLACKID
-        whitesConnected = self.winDFS(WstartFromRow, WstartFromCol, WHITEID)
+        whitesConnected = self.winDFS(WstartFromRow, WstartFromCol, 'W')
         if whitesConnected == self.whites_left:
             return True, WHITEID
         return False, -1
@@ -157,7 +158,7 @@ class Board:
             for k in range(len(DIRX)):
                 dx = i + DIRX[k]
                 dy = j + DIRY[k]
-                if withinBoard(dx, dy) and (dx, dy) not in visited and self.boardList2d[dx][dy]!=-1 and self.boardList2d[dx][dy].id == id:
+                if withinBoard(dx, dy) and (dx, dy) not in visited and self.simpleBoard[dx][dy]!='_' and self.simpleBoard[dx][dy] == id:
                     connectedPieces += 1
                     visited.add((dx, dy))
                     stack.append((dx, dy))

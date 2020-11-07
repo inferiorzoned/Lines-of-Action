@@ -1,75 +1,63 @@
-import pygame as pg
-import math 
-from .constants import *
-from .board import *
+# import pygame as pg
+from math import inf
+from copy import deepcopy
+from .constants import ROWS, COLS
+from .board import Board
 
 class AI:
     def __init__(self):
         self.boardAI = Board()
-        self.depth = 2
+        self.depth = 3
         self.ownid = 'W'
         self.opid = 'B'
         pass
 
     def AImove(self, game):
-        for r in range(ROWS):
-            for c in range(COLS):
-                self.boardAI.simpleBoard[r][c] = game.board.simpleBoard[r][c]
-        # print(self)
-        # game.select(5, 0)
-        # game.update()
-        # print(self.boardAI.getValidMoves(5, 0))
-        # s = game.board.getValidMoves(5, 0)  
-        # r,c = s.pop()
-        # game.select(r,c)
+        self.boardAI.simpleBoard = [list(x) for x in game.board.simpleBoard]
+        print(self.eval(self.getConfig()))
         
         afterMoveBoard = self.alphaBetaMiniMax()
         printBoard(afterMoveBoard)
         
-        fromPos = None
-        toPos = None 
+        fromPos = toPos = None
         for r in range(ROWS):
             for c in range(COLS):
                 if game.board.simpleBoard[r][c] == 'W' and afterMoveBoard[r][c] != 'W':
                     fromPos = (r, c)
                 elif game.board.simpleBoard[r][c] != 'W' and afterMoveBoard[r][c] == 'W':
                     toPos = (r, c)
+        r0, c0 = fromPos    
         r1, c1 = toPos
-        r0, c0 = fromPos
         game.select(r0, c0)
-        game.update()
+        # game.update()
         game.select(r1, c1)
-                
-        # self.boardAI.simpleMove(5, 0, 4, 6)
-        # printBoard(self.getConfig())
-        # self.boardAI.simpleMove(4, 6, 5, 0)
-        # printBoard(self.getConfig())
+        # print(self.eval(self.getConfig()))
+
     def getSuccessors(self, boardConfig, id):
+        op = None
+        if id == 'W': op = 'B'
+        else: op = 'W'
         configs = []
-        initPositions = []
-        for r in range(ROWS):
-            for c in range(COLS):
-                if boardConfig[r][c] == id:
-                    initPositions.append((r, c))
-                    
-        for r in range(ROWS):
-            for c in range(COLS):
-                self.boardAI.simpleBoard[r][c] = boardConfig[r][c]
-                
+        
+        initPositions = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == id]
+        self.boardAI.simpleBoard =  [list(x) for x in boardConfig]
         for pos in initPositions:
             r0, c0 = pos 
             for pos2 in self.boardAI.getValidMoves(r0, c0):
+                dummy = [list(x) for x in boardConfig]
                 r1, c1 = pos2
-                if boardConfig[r][c] != '_': boardConfig[r][c] = '_'
-                self.boardAI.simpleMove(r0, c0, r1, c1)
-                configs.append(self.getConfig())
-                # print(configs)
-                self.boardAI.simpleMove(r1, c1, r0, c0)
+                # if boardConfig[r][c] != '_': boardConfig[r][c] = '_'
+                if dummy[r1][c1] != '_' and dummy[r1][c1] == op:
+                    dummy[r1][c1] = '_'
+                dummy[r0][c0], dummy[r1][c1] = dummy[r1][c1], dummy[r0][c0]
+                dummyCopy = [list(x) for x in dummy]
+                configs.append(dummyCopy)
+                dummy[r0][c0], dummy[r1][c1] = dummy[r1][c1], dummy[r0][c0]
         return configs 
     
         
     def alphaBetaMiniMax(self):
-        maxVal, boardConfig = self.alphaBetaMax(self.depth, self.getConfig(), -math.inf, math.inf)
+        maxVal, boardConfig = self.alphaBetaMax(self.depth, self.getConfig(), -inf, inf)
         return boardConfig
     
     def alphaBetaMax(self, depth, boardConfig, alpha, beta):
@@ -77,9 +65,8 @@ class AI:
         if depth == 0:  
             return self.eval(boardConfig), boardConfig 
         
-        v = -math.inf
+        v = -inf
         configs = self.getSuccessors(boardConfig, 'W')
-        print(len(configs))
         newBoard = None
         
         for possibleConfig in configs:
@@ -88,8 +75,8 @@ class AI:
             v = max(v, val)
             
             if v > beta:
-                print("here")
-                return v, boardConfig
+                # return v, boardConfig
+                return v, confg
             alpha = max(alpha, v)
             newBoard = [list(x) for x in possibleConfig]
         return v, newBoard
@@ -99,9 +86,8 @@ class AI:
         if depth == 0:  
             return self.eval(boardConfig), boardConfig 
         
-        v = math.inf
+        v = inf
         configs = self.getSuccessors(boardConfig, 'B')
-        print(len(configs))
         newBoard = None
         
         for possibleConfig in configs:
@@ -109,22 +95,24 @@ class AI:
             v = min(v, val)
             
             if v < alpha:
-                return v, boardConfig
+                # return v, boardConfig
+                return v, confg
             beta = min(beta, v)
             newBoard = [list(x) for x in possibleConfig]
         return v, newBoard
         
     
     def eval(self, boardConfig):
-        return 0
-    
+        score = 0
+        
+        whitePieces = sum(line.count('W') for line in boardConfig)
+        blackPieces = sum(line.count('B') for line in boardConfig)
+        score += whitePieces - blackPieces
+        
+        return score
+                
     def getConfig(self):
-        config = []
-        for r in range(ROWS):
-            config.append([])
-            for c in range(COLS):
-                config[r].append(self.boardAI.simpleBoard[r][c])
-        return config
+        return [list(x) for x in self.boardAI.simpleBoard]
     
     def __str__(self):
         str = ""

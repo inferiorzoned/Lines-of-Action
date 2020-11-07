@@ -1,7 +1,8 @@
-import pygame as pg
+# import pygame as pg
+from pygame import display, draw
 from .ai import *
-from .constants import *
-from .board import *
+from .constants import BLACKID, WHITEID, SQUARE_SIZE, REDDIRECTION, BLUELINE, AImode
+from .board import Board
 
 class Game:
     def __init__(self, win):
@@ -25,20 +26,20 @@ class Game:
                 print(f"{who} has won the game!")
             if self.fromPos != None:
                 self.drawMoveLine(self.fromPos, self.toPos)
-        pg.display.update()
+        display.update()
 
     def drawValidMoves(self, validMoves):
         for move in validMoves:
             # print(move)
             r, c = move
-            pg.draw.circle(self.win, REDDIRECTION, (c * SQUARE_SIZE + SQUARE_SIZE//2, r * SQUARE_SIZE + SQUARE_SIZE//2), 13)
-            pg.draw.line(self.win, REDDIRECTION, (self.selectedPiece.col * SQUARE_SIZE + SQUARE_SIZE//2, self.selectedPiece.row * SQUARE_SIZE + SQUARE_SIZE//2), (c * SQUARE_SIZE + SQUARE_SIZE//2, r * SQUARE_SIZE + SQUARE_SIZE//2), 8)
+            draw.circle(self.win, REDDIRECTION, (c * SQUARE_SIZE + SQUARE_SIZE//2, r * SQUARE_SIZE + SQUARE_SIZE//2), 13)
+            draw.line(self.win, REDDIRECTION, (self.selectedPiece.col * SQUARE_SIZE + SQUARE_SIZE//2, self.selectedPiece.row * SQUARE_SIZE + SQUARE_SIZE//2), (c * SQUARE_SIZE + SQUARE_SIZE//2, r * SQUARE_SIZE + SQUARE_SIZE//2), 8)
             
     def drawMoveLine(self, fromPos, toPos):
         r0, c0 = fromPos
         r1, c1 = toPos
-        pg.draw.circle(self.win, BLUELINE, (c1 * SQUARE_SIZE + SQUARE_SIZE//2, r1 * SQUARE_SIZE + SQUARE_SIZE//2), 13)
-        pg.draw.line(self.win, BLUELINE, (c0 * SQUARE_SIZE + SQUARE_SIZE//2, r0 * SQUARE_SIZE + SQUARE_SIZE//2), (c1 * SQUARE_SIZE + SQUARE_SIZE//2, r1 * SQUARE_SIZE + SQUARE_SIZE//2), 8)
+        draw.circle(self.win, BLUELINE, (c1 * SQUARE_SIZE + SQUARE_SIZE//2, r1 * SQUARE_SIZE + SQUARE_SIZE//2), 13)
+        draw.line(self.win, BLUELINE, (c0 * SQUARE_SIZE + SQUARE_SIZE//2, r0 * SQUARE_SIZE + SQUARE_SIZE//2), (c1 * SQUARE_SIZE + SQUARE_SIZE//2, r1 * SQUARE_SIZE + SQUARE_SIZE//2), 8)
     
     def select(self, r, c):
         if self.selectedPiece is None:
@@ -68,7 +69,7 @@ class Game:
         if self.turn == BLACKID:
             self.turn = WHITEID
             self.op = BLACKID
-            # AImove(self)
+            self.update()
             if AImode: self.ai.AImove(self)
             
         else:

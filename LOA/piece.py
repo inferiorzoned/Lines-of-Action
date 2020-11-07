@@ -1,5 +1,6 @@
-import pygame as pg
-from .constants import *
+# import pygame as pg
+from pygame import draw
+from .constants import SQUARE_SIZE, WHITEID, BLACKID, BLACK, WHITE
 
 class Piece:
     PADDING = 17
@@ -22,11 +23,11 @@ class Piece:
     def draw_piece(self, win):
         rad = SQUARE_SIZE//2 - self.PADDING
         if self.id == WHITEID:
-            pg.draw.circle(win, BLACK, (self.x, self.y), rad + self.OUTLINE)    
+            draw.circle(win, BLACK, (self.x, self.y), rad + self.OUTLINE)    
         else:
-            pg.draw.circle(win, WHITE, (self.x, self.y), rad + self.OUTLINE)
+            draw.circle(win, WHITE, (self.x, self.y), rad + self.OUTLINE)
          
-        pg.draw.circle(win, self.color, (self.x, self.y), rad)
+        draw.circle(win, self.color, (self.x, self.y), rad)
 
     def update(self, r, c):
         self.row = r
