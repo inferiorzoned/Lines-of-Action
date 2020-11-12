@@ -1,9 +1,9 @@
 # import pygame as pg
-from pygame import display, draw
+from pygame import display, draw, event, font, QUIT, Surface
 import sys
 from time import sleep
 from .ai import *
-from .constants import BLACKID, WHITEID, SQUARE_SIZE, REDDIRECTION, BLUELINE, AImode
+from .constants import BLACKID, WHITEID, SQUARE_SIZE, REDDIRECTION, BLUELINE, AImode, WIDTH, HEIGHT, WHITE, BLACK, WINBG, WINS
 from .board import Board
 
 # import sys, os, inspect
@@ -29,19 +29,46 @@ class Game:
         if self.selectedPiece is not None:
             hasWon, who = self.winner()
             if hasWon:
+                display.update()
                 print(f"{who} has won the game!")
-                sleep(1.5)
-                sys.exit()
+                sleep(2.5)
+                Surface.fill(self.win, WINBG)
+                while True:
+                    for e in event.get():
+                        if e.type == QUIT:
+                            sys.exit()
+                    if who == BLACKID:
+                        draw.circle(self.win, WHITE, (WIDTH//2,HEIGHT//2 - 150), 150+2) 
+                        draw.circle(self.win, BLACK, (WIDTH//2,HEIGHT//2 - 150), 150) 
+                    else:
+                        draw.circle(self.win, BLACK, (WIDTH//2,HEIGHT//2 - 150), 150+2) 
+                        draw.circle(self.win, WHITE, (WIDTH//2,HEIGHT//2- 150), 150)     
+                    self.win.blit(WINS, ((WIDTH//2 - 200,HEIGHT//2 + 50)))      
+                    display.update()    
+                        
             self.drawValidMoves(self.validMoves)    
+            
         if self.selectedPiece is None:
             if self.fromPos != None:
                 self.drawMoveLine(self.fromPos, self.toPos)
             hasWon, who = self.winner()
             if hasWon:
+                display.update()
                 print(f"{who} has won the game!")
-                display.update()        
-                sleep(1.5)
-                sys.exit()
+                sleep(2.5)
+                Surface.fill(self.win, WINBG)
+                while True:
+                    for e in event.get():
+                        if e.type == QUIT:
+                            sys.exit()
+                    if who == BLACKID:
+                        draw.circle(self.win, WHITE, (WIDTH//2,HEIGHT//2- 150), 150+2) 
+                        draw.circle(self.win, BLACK, (WIDTH//2,HEIGHT//2- 150), 150) 
+                    else:
+                        draw.circle(self.win, BLACK, (WIDTH//2,HEIGHT//2- 150), 150+2)           
+                        draw.circle(self.win, WHITE, (WIDTH//2,HEIGHT//2- 150), 150)           
+                    self.win.blit(WINS, ((WIDTH//2 - 200,HEIGHT//2 + 50)))      
+                    display.update()
         display.update()
 
     def drawValidMoves(self, validMoves):
@@ -79,7 +106,7 @@ class Game:
             self.validMoves = self.board.getValidMoves(p.row, p.col)
     
     def changeTurn(self):
-        print(f"turn changed to {self.op}")
+        # print(f"turn changed to {self.op}")
         self.validMoves.clear()
         self.selectedPiece = None
         if self.turn == BLACKID:
@@ -87,11 +114,11 @@ class Game:
             self.op = BLACKID
             self.update()
             if AImode: self.ai.AImove(self)
-            print(self.board.whites_left, self.board.blacks_left)
+            # print(self.board.whites_left, self.board.blacks_left)
         else:
             self.turn = BLACKID
             self.op = WHITEID
-            print(self.board.whites_left, self.board.blacks_left)
+            # print(self.board.whites_left, self.board.blacks_left)
             
     def winner(self):
         return self.board.winner()

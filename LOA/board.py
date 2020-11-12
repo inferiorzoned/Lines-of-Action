@@ -11,14 +11,22 @@ class Board:
         self.addPiecesToBoard()
         
     def draw_checkBoard(self, win):
-        for r in range(ROWS):
-            if r%2 == 0: c1, c2 = CHECK1, CHECK2
-            else: c1, c2 = CHECK2, CHECK1
-            for c in range(COLS):
+        posn = 0
+        for row in self.simpleBoard:
+            if (posn//ROWS)%2 == 0: 
+                c1 = CHECK1
+                c2 = CHECK2
+            else:
+                c1 = CHECK2
+                c2 = CHECK1
+            for col in row:
+                r = posn//ROWS
+                c = posn%ROWS
                 if c%2 == 0:
                     draw.rect(win, c1, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
                 else:
                     draw.rect(win, c2, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                posn += 1
                     
     def addPiecesToBoard(self):
         for r in range(ROWS):
@@ -128,18 +136,26 @@ class Board:
             return True, BLACKID
         BstartFromRow = BstartFromCol = WstartFromRow = WstartFromCol = None
         firstBlackFound = firstWhiteFound = False
-        for r in range(ROWS):
-            for c in range(COLS):
-                if self.simpleBoard[r][c] != '_':
-                    if self.simpleBoard[r][c] == 'B' and not firstBlackFound:
+        
+        posn = 0
+        t = 0
+        for row in self.simpleBoard:
+            for col in row:
+                r = t
+                c = posn
+                if col != '_':
+                    if col == 'B' and not firstBlackFound:
                         BstartFromRow = r
                         BstartFromCol = c    
                         firstBlackFound = True
-                    elif self.simpleBoard[r][c] == 'W' and not firstWhiteFound:
+                    elif col == 'W' and not firstWhiteFound:
                         WstartFromRow = r
                         WstartFromCol = c    
                         firstWhiteFound = True
+                posn += 1
                 if firstBlackFound and firstWhiteFound: break
+            posn = 0
+            t += 1
             if firstBlackFound and firstWhiteFound: break
             
         blacksConnected = self.winDFS(BstartFromRow, BstartFromCol, 'B')
@@ -174,3 +190,6 @@ class Board:
                 boardConfig += p
             boardConfig += "\n"
         return boardConfig
+
+def withinBoard(r, c):
+    return r >= 0 and r < ROWS and c >= 0 and c < COLS

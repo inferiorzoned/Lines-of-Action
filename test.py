@@ -8,6 +8,7 @@ from math import sqrt, hypot
 
 CHECK1 = 10
 CHECK2 = 20
+ROWS = 8
 
 def test1():
     for r in range(10):
@@ -259,6 +260,106 @@ def test25():
     by1, by0 = tuple(map(min, zip(*whitePieces))) 
 # test23 better than test24 better test25
 
+
+def test26():
+    BstartFromRow = BstartFromCol = WstartFromRow = WstartFromCol = None
+    firstBlackFound = firstWhiteFound = False
+        
+    posn = 0
+    for row in X:
+        for col in row:
+            r = posn//ROWS
+            c = posn%ROWS
+            if col != '_':
+                if col == 'B' and not firstBlackFound:
+                    BstartFromRow = r
+                    BstartFromCol = c    
+                    firstBlackFound = True
+                elif col == 'W' and not firstWhiteFound:
+                    WstartFromRow = r
+                    WstartFromCol = c    
+                    firstWhiteFound = True
+            posn += 1
+            if firstBlackFound and firstWhiteFound: break
+        if firstBlackFound and firstWhiteFound: break
+    
+def test27():
+    BstartFromRow = BstartFromCol = WstartFromRow = WstartFromCol = None
+    firstBlackFound = firstWhiteFound = False
+        
+    posn = 0
+    t = 0
+    for row in X:
+        for col in row:
+            r = t
+            c = posn
+            if col != '_':
+                if col == 'B' and not firstBlackFound:
+                    BstartFromRow = r
+                    BstartFromCol = c    
+                    firstBlackFound = True
+                elif col == 'W' and not firstWhiteFound:
+                    WstartFromRow = r
+                    WstartFromCol = c    
+                    firstWhiteFound = True
+            posn += 1
+            if firstBlackFound and firstWhiteFound: break
+        posn = 0
+        t += 1
+        if firstBlackFound and firstWhiteFound: break
+        
+def test28():
+    BstartFromRow = BstartFromCol = WstartFromRow = WstartFromCol = None
+    firstBlackFound = firstWhiteFound = False
+        
+    posn = 0
+    for r in range(ROWS):
+        for c in range(ROWS):
+            if X[r][c] != '_':
+                if X[r][c] == 'B' and not firstBlackFound:
+                    BstartFromRow = r
+                    BstartFromCol = c    
+                    firstBlackFound = True
+                elif X[r][c] == 'W' and not firstWhiteFound:
+                    WstartFromRow = r
+                    WstartFromCol = c    
+                    firstWhiteFound = True
+            if firstBlackFound and firstWhiteFound: break
+        if firstBlackFound and firstWhiteFound: break
+# test27 always faster than test26, test26 faster than test28
+
+def test29():
+    score = 0
+    whitePieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 1]
+    blackPieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 2]  
+    NoofWhitePieces = len(whitePieces)
+    NoofBlackPieces = len(blackPieces)
+    
+    whiteCOMX = sum(r for (r, c) in whitePieces)/ NoofWhitePieces
+    whiteCOMY = sum(c for (r, c) in whitePieces)/ NoofWhitePieces
+    blackCOMX = sum(r for (r, c) in blackPieces)/ NoofBlackPieces
+    blackCOMY = sum(c for (r, c) in blackPieces)/ NoofBlackPieces
+    
+    densityW = sum(hypot(whiteCOMX-r, whiteCOMY-c) for (r, c) in whitePieces)/ NoofWhitePieces
+    densityB = sum(hypot(blackCOMX-r, blackCOMY-c) for (r, c) in blackPieces)/ NoofBlackPieces
+    score += (densityB - densityW)*10
+
+def test30():
+    score = 0
+    whitePieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 1]
+    blackPieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 2]  
+    NoofWhitePieces = len(whitePieces)
+    NoofBlackPieces = len(blackPieces)
+    
+    whiteCOMX = sum(r for (r, c) in whitePieces)/ NoofWhitePieces
+    whiteCOMY = sum(c for (r, c) in whitePieces)/ NoofWhitePieces
+    blackCOMX = sum(r for (r, c) in blackPieces)/ NoofBlackPieces
+    blackCOMY = sum(c for (r, c) in blackPieces)/ NoofBlackPieces
+    
+    densityW = sum((abs(whiteCOMX-r) + abs (whiteCOMY-c)) for (r, c) in whitePieces)/ NoofWhitePieces
+    densityB = sum((abs(blackCOMX-r) + abs(blackCOMY-c)) for (r, c) in blackPieces)/ NoofBlackPieces
+    score += (densityB - densityW)*10
+
 setup = '''
 from __main__ import test1
 from __main__ import test2
@@ -284,6 +385,11 @@ from __main__ import test21
 from __main__ import test23
 from __main__ import test24
 from __main__ import test25
+from __main__ import test26
+from __main__ import test27
+from __main__ import test28
+from __main__ import test29
+from __main__ import test30
 '''
         
 t1 = '''test1()'''
@@ -310,11 +416,15 @@ t21 = '''test21()'''
 t23 = '''test23()'''
 t24 = '''test24()'''
 t25 = '''test25()'''
+t26 = '''test26()'''
+t27 = '''test27()'''
+t28 = '''test28()'''
+t29 = '''test29()'''
+t30 = '''test30()'''
 
-
-print(timeit.timeit(setup=setup,stmt = t23, number = 100000))
-print(timeit.timeit(setup=setup,stmt = t24, number = 100000))
-print(timeit.timeit(setup=setup,stmt = t25, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t29, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t30, number = 100000))
+# print(timeit.timeit(setup=setup,stmt = t28, number = 100000))
 
 
 

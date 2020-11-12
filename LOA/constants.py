@@ -3,7 +3,7 @@ import pygame as pg
 FPS = 60
 
 WIDTH = HEIGHT = 960
-ROWS = COLS = 8
+ROWS = COLS = 6
 SQUARE_SIZE = WIDTH//COLS
 
 AImode = True
@@ -15,6 +15,7 @@ BLACK = pg.Color("#000000")
 WHITE = pg.Color("#ffffff")
 REDDIRECTION = pg.Color("#ff3838")
 BLUELINE = pg.Color("#0000ff")
+WINBG = pg.Color("#fa7d7d")
 
 #ID
 BLACKID = 101
@@ -31,8 +32,7 @@ DIRECTIONS = [UPDOWN, LEFTRIGHT, BOTTOMLEFT, BOTTOMRIGHT]
 DIRX = [-1,1,0,0,1,-1,1,-1]
 DIRY = [0,0,-1,1,-1,1,1,-1]
 
-def withinBoard(r, c):
-    return r >= 0 and r < ROWS and c >= 0 and c < COLS
+DIR = [(-1,0), (1,0), (0,-1), (0,1), (1,-1), (-1,1), (1,1), (-1,-1)]
 
 pieceSquaretable = []
 if ROWS == 8:
@@ -55,3 +55,5 @@ elif ROWS == 6:
         [-25,  10, 10, 10, 10,  -25],
         [-80,  -20, -20, -20, -20, -80]
     ]
+    
+WINS = pg.transform.scale(pg.image.load('wins3.png'), (400, 300))

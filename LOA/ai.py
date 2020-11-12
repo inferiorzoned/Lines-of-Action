@@ -2,7 +2,7 @@
 from math import inf, hypot
 import sys
 from copy import deepcopy
-from .constants import ROWS, COLS, WHITEID, BLACKID, pieceSquaretable
+from .constants import ROWS, COLS, WHITEID, BLACKID, pieceSquaretable, DIR, DIRECTIONS, DIRX, DIRY
 from .board import Board
 
 class AI:
@@ -15,10 +15,10 @@ class AI:
 
     def AImove(self, game):
         self.boardAI.simpleBoard = [list(x) for x in game.board.simpleBoard]
-        print(self)
+        # print(self)
     
         afterMoveBoard = self.alphaBetaMiniMax()
-        printBoard(afterMoveBoard)
+        # printBoard(afterMoveBoard)
         
         fromPos = toPos = None
         for r in range(ROWS):
@@ -40,13 +40,13 @@ class AI:
         configs = []
         
         initPositions = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == id]
-        self.boardAI.simpleBoard =  [list(x) for x in boardConfig]
+        # self.boardAI.simpleBoard =  [list(x) for x in boardConfig]
         for pos in initPositions:
             r0, c0 = pos 
-            for pos2 in self.boardAI.getValidMoves(r0, c0):
+            # for pos2 in self.boardAI.getValidMoves(r0, c0):
+            for pos2 in self.getValidMoves(r0, c0, boardConfig):
                 dummy = [list(x) for x in boardConfig]
                 r1, c1 = pos2
-                # if boardConfig[r][c] != '_': boardConfig[r][c] = '_'
                 if dummy[r1][c1] != '_' and dummy[r1][c1] == op:
                     dummy[r1][c1] = '_'
                 dummy[r0][c0], dummy[r1][c1] = dummy[r1][c1], dummy[r0][c0]
@@ -64,13 +64,10 @@ class AI:
         self.boardAI.simpleBoard = [list(x) for x in boardConfig]
         hasWon, who = self.boardAI.winner()
         if depth == 0 or hasWon:  
-            # print("here")
-            return self.eval(boardConfig), boardConfig 
-        
+            return self.eval(boardConfig, depth), boardConfig 
         maxv = -inf
         configs = self.getSuccessors(boardConfig, 'W')
         newBoard = None
-        
         for possibleConfig in configs:
             val, confg = self.alphaBetaMin(depth-1, possibleConfig, alpha, beta)
             if maxv < val:
@@ -78,31 +75,16 @@ class AI:
                 newBoard = [list(x) for x in possibleConfig]
                 alpha = max(alpha, maxv)
                 if beta <= alpha: break
-        
-        # for possibleConfig in configs:
-        #     val, confg = self.alphaBetaMin(depth-1, possibleConfig, alpha, beta)
-            
-        #     maxv = max(maxv, val)
-        #     alpha = max(alpha, maxv)
-            
-        #     if beta <= alpha:
-        #         # return v, boardConfig
-        #         return maxv, boardConfig
-        #     # alpha = max(alpha, maxv)
-        #     newBoard = [list(x) for x in confg]
         return maxv, newBoard
     
     def alphaBetaMin(self, depth, boardConfig, alpha, beta):
         self.boardAI.simpleBoard = [list(x) for x in boardConfig]
         hasWon, who = self.boardAI.winner()
         if depth == 0 or hasWon:  
-            # print("here")
-            return self.eval(boardConfig), boardConfig 
-        
+            return self.eval(boardConfig, depth), boardConfig 
         minv = inf
         configs = self.getSuccessors(boardConfig, 'B')
         newBoard = None
-        
         for possibleConfig in configs:
             val, confg = self.alphaBetaMax(depth-1, possibleConfig, alpha, beta)
             if minv > val:
@@ -110,106 +92,60 @@ class AI:
                 newBoard = [list(x) for x in possibleConfig]
                 beta = min(beta, minv)
                 if beta <= alpha: break
-        # for possibleConfig in configs:
-        #     val, confg = self.alphaBetaMax(depth-1, possibleConfig, alpha, beta)
-        #     minv = min(minv, val)
-        #     beta = min(beta, minv)
-        #     if beta <= alpha:
-        #         # return v, boardConfig
-        #         return minv, boardConfig
-            
-        #     newBoard = [list(x) for x in confg]
         return minv, newBoard
         
     
-    def eval(self, boardConfig):
-        # whitePieces = []
-        # blackPieces = []
-        # whiteX = whiteY = blackX = blackY = 0
-        # posn = 0
-        # for row in boardConfig:
-        #     for col in row:
-        #         if col == 'W': 
-        #             whiteX = posn//ROWS
-        #             whiteY = posn%ROWS
-        #             whitePieces.append((whiteX, whiteY))
-        #         elif col == 'B':
-        #             blackX = posn//ROWS
-        #             blackY = posn%ROWS
-        #             blackPieces.append((blackX, blackY))
-        #         posn += 1
+    def eval(self, boardConfig, depth):
         whitePieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'W']
         blackPieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'B']
         # -------------------------check winner-------------------------
-        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
-        hasWon, who = self.boardAI.winner()
-        if who == WHITEID:
-            return 10000
-        elif who == BLACKID:
-            return -10000
-        score = 0
-        # ----------------------------check remaining pieces----------------------
         NoofWhitePieces = len(whitePieces)
         NoofBlackPieces = len(blackPieces)
+        hasWon, who = self.winner(boardConfig, NoofWhitePieces, NoofBlackPieces)
+        if who == WHITEID:
+            # printBoard(boardConfig)
+            # print(who, " might win")
+            return 10000 + depth
+        elif who == BLACKID:
+            # printBoard(boardConfig)
+            # print(who, " might win")
+            return -10000 - depth
+        # --------------------------------heuristic starts---------------------------
+        score = 0
+        # ----------------------------check remaining pieces----------------------
         score += (NoofWhitePieces - NoofBlackPieces)*10
         # ----------------------------calculate density----------------------------
-        # whiteX = whiteY = blackX = blackY = 0
-        # posn = 0
-        whiteX = sum(r for (r, c) in whitePieces)
-        whiteY = sum(c for (r, c) in whitePieces)
-        blackX = sum(r for (r, c) in blackPieces)
-        blackY = sum(c for (r, c) in blackPieces)
-        # for row in boardConfig:
-        #     for col in row:
-        #         if col == 'W': 
-        #             whiteX += posn//ROWS
-        #             whiteY += posn%ROWS
-        #         elif col == 'B':
-        #             blackX += posn//ROWS
-        #             blackY += posn%ROWS
-        #         posn += 1
-        whiteCOMX = whiteX/ NoofWhitePieces
-        whiteCOMY = whiteY/ NoofWhitePieces
-        blackCOMX = blackX/ NoofBlackPieces
-        blackCOMY = blackY/ NoofBlackPieces
-        # densityW = densityB = 0
-        # posn = 0
+        whiteCOMX = sum(r for (r, c) in whitePieces)/ NoofWhitePieces
+        whiteCOMY = sum(c for (r, c) in whitePieces)/ NoofWhitePieces
+        blackCOMX = sum(r for (r, c) in blackPieces)/ NoofBlackPieces
+        blackCOMY = sum(c for (r, c) in blackPieces)/ NoofBlackPieces
+        
         densityW = sum(hypot(whiteCOMX-r, whiteCOMY-c) for (r, c) in whitePieces)/ NoofWhitePieces
         densityB = sum(hypot(blackCOMX-r, blackCOMY-c) for (r, c) in blackPieces)/ NoofBlackPieces
-        # for row in boardConfig:
-        #     for col in row:
-        #         if col == 'W': 
-        #             whiteX = posn//ROWS
-        #             whiteY = posn%ROWS
-        #             densityW += hypot(whiteCOMX-whiteX, whiteCOMY-whiteY)
-        #         elif col == 'B':
-        #             blackX = posn//ROWS
-        #             blackY = posn%ROWS
-        #             densityB += hypot(blackCOMX-blackX, blackCOMY-blackY)
-        #         posn += 1
-        # densityW = densityW/ whitePieces
-        # densityB = densityB/ blackPieces
         score += (densityB - densityW)*10
         # -------------------------calculate area-----------------------
         wx0 = wy1 = bx0 = by1 = -1
         wy0 = wx1 = by0 = bx1 = ROWS+1
         posn = 0
+        t = 0
         for row in boardConfig:
             for col in row:
                 if col == 'W':
-                    wx0 = max(wx0, posn//ROWS)
-                    wy0 = min(wy0, posn%ROWS)
-                    wx1 = min(wx1, posn//ROWS)
-                    wy1 = max(wy1, posn%ROWS)
+                    wx0 = max(wx0, t)
+                    wy0 = min(wy0, posn)
+                    wx1 = min(wx1, t)
+                    wy1 = max(wy1, posn)
                 elif col == 'B':
-                    bx0 = max(bx0, posn//ROWS)
-                    by0 = min(by0, posn%ROWS)
-                    bx1 = min(bx1, posn//ROWS)
-                    by1 = max(by1, posn%ROWS)
+                    bx0 = max(bx0, t)
+                    by0 = min(by0, posn)
+                    bx1 = min(bx1, t)
+                    by1 = max(by1, posn)
+                posn += 1
+            posn = 0
+            t += 1
         areaA = abs(wx0-wx1) * abs(wy1-wy0)
         areaB = abs(bx0-bx1) * abs(by1-by0)
         score += (areaB - areaA)*10
-        
         # ---------------pieceSQuareTable--------------------------------
         whitePieceVal = sum(pieceSquaretable[r][c] for (r, c) in whitePieces)
         blackPieceVal = sum(pieceSquaretable[r][c] for (r, c) in blackPieces)
@@ -220,6 +156,110 @@ class AI:
     def getConfig(self):
         return [list(x) for x in self.boardAI.simpleBoard]
     
+    def getValidMoves(self, r, c, boardConfig):
+        validPositions = set()
+        # for direction in DIRECTIONS:
+        for direction in DIRECTIONS:
+            dx = DIRX[direction]
+            dy = DIRY[direction]
+            piecesinBothPaths = self.getPiecesinPath(direction, r, c, boardConfig)
+            if self.canJump(piecesinBothPaths, direction, r, c, boardConfig[r][c], dx, dy, boardConfig):
+                if self.getOpponentPiecesInPath(piecesinBothPaths, direction, r, c, boardConfig[r][c], dx, dy, boardConfig) == 0:
+                    validPositions.add((r + dx*piecesinBothPaths, c + dy*piecesinBothPaths))
+                    
+            dx = DIRX[direction+1]
+            dy = DIRY[direction+1]
+            if self.canJump(piecesinBothPaths, direction+1, r, c, boardConfig[r][c], dx, dy, boardConfig):
+                if self.getOpponentPiecesInPath(piecesinBothPaths, direction+1, r, c, boardConfig[r][c], dx, dy, boardConfig) == 0:
+                    validPositions.add((r + dx*piecesinBothPaths, c + dy*piecesinBothPaths))
+        return validPositions       
+            
+            
+    def getPiecesinPath(self, direction, r, c, boardConfig):
+        return 1 + self.getNumbers(direction, r, c, boardConfig) + self.getNumbers(direction+1, r, c, boardConfig)
+
+    def getNumbers(self, direction, currRow, currCol, boardConfig):
+        numbers = 0
+        dx = DIRX[direction]
+        dy = DIRY[direction]
+        currRow += dx
+        currCol += dy
+        while withinBoard(currRow, currCol):
+            if boardConfig[currRow][currCol] != '_':
+                numbers += 1
+            currRow = currRow + dx
+            currCol = currCol + dy
+        return numbers
+    
+    def getOpponentPiecesInPath(self, jump, direction, currRow, currCol, id, dx, dy, boardConfig):
+        opponentPieces = 0
+        r = currRow + dx
+        c = currCol + dy
+        while jump > 1:
+            if boardConfig[r][c] != '_' and boardConfig[r][c] != id:
+                opponentPieces += 1
+            r = r + dx
+            c = c + dy
+            jump = jump - 1
+        return opponentPieces
+    
+    def canJump(self, jump, direction, currRow, currCol, id, dx, dy, boardConfig):
+        r = currRow + dx*jump
+        c = currCol + dy*jump
+        if withinBoard(r, c) and (boardConfig[r][c] == '_' or boardConfig[r][c] != id):
+            return True
+        else: return False
+    
+    def winner(self, boardConfig, w, b):
+        if w == 1:
+            return True, WHITEID
+        elif b == 1:
+            return True, BLACKID
+        BstartFromRow = BstartFromCol = WstartFromRow = WstartFromCol = None
+        firstBlackFound = firstWhiteFound = False  
+        posn = 0
+        t = 0
+        for row in boardConfig:
+            for col in row:
+                r = t
+                c = posn
+                if col != '_':
+                    if col == 'B' and not firstBlackFound:
+                        BstartFromRow = r
+                        BstartFromCol = c    
+                        firstBlackFound = True
+                    elif col == 'W' and not firstWhiteFound:
+                        WstartFromRow = r
+                        WstartFromCol = c    
+                        firstWhiteFound = True
+                posn += 1
+                if firstBlackFound and firstWhiteFound: break
+            posn = 0
+            t += 1
+            if firstBlackFound and firstWhiteFound: break
+        
+        blacksConnected = self.winDFS(BstartFromRow, BstartFromCol, 'B', boardConfig)
+        if blacksConnected == b:
+            return True, BLACKID
+        whitesConnected = self.winDFS(WstartFromRow, WstartFromCol, 'W', boardConfig)
+        if whitesConnected == w:
+            return True, WHITEID
+        return False, -1
+    
+    def winDFS(self, i, j, id, boardConfig):
+        connectedPieces = 0
+        visited, stack = set(), [(i, j)]   
+        while stack:
+            i, j = stack.pop()
+            for di, dj in DIR:
+                dx = i + di
+                dy = j + dj
+                if withinBoard(dx, dy) and (dx, dy) not in visited and boardConfig[dx][dy] == id:
+                    connectedPieces += 1
+                    visited.add((dx, dy))
+                    stack.append((dx, dy))
+        return connectedPieces
+    
     def __str__(self):
         str = ""
         for r in range(ROWS):
@@ -227,7 +267,10 @@ class AI:
                 str += self.boardAI.simpleBoard[r][c] + " "
             str += "\n"
         return str 
-    
+
+def withinBoard(r, c):
+    return r >= 0 and r < ROWS and c >= 0 and c < COLS
+  
 def printBoard(config):
     str = ""
     for r in range(ROWS):
