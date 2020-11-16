@@ -2,15 +2,17 @@
 from math import inf, hypot
 import sys
 from copy import deepcopy
-from .constants import ROWS, COLS, WHITEID, BLACKID, pieceSquaretable, DIR, DIRECTIONS, DIRX, DIRY
+from .constants import WHITEID, BLACKID, DIR, DIRECTIONS, DIRX, DIRY, Dims
 from .board import Board
+# from .game import Game
 
 class AI:
-    def __init__(self):
-        self.boardAI = Board()
+    def __init__(self, dim):
+        self.boardAI = Board(dim)
         self.depth = 3
         self.ownid = 'W'
         self.opid = 'B'
+        self.dim = dim
         pass
 
     def AImove(self, game):
@@ -21,17 +23,19 @@ class AI:
         # printBoard(afterMoveBoard)
         
         fromPos = toPos = None
-        for r in range(ROWS):
-            for c in range(COLS):
+        for r in range(self.dim):
+            for c in range(self.dim):
                 if game.board.simpleBoard[r][c] == 'W' and afterMoveBoard[r][c] != 'W':
                     fromPos = (r, c)
                 elif game.board.simpleBoard[r][c] != 'W' and afterMoveBoard[r][c] == 'W':
                     toPos = (r, c)
         r0, c0 = fromPos    
         r1, c1 = toPos
-        game.select(r0, c0)
+        game.select((Dims.SQUARE_SIZE * c0 + Dims.SQUARE_SIZE // 2, Dims.SQUARE_SIZE * r0 + Dims.SQUARE_SIZE // 2))
+        # game.select(r0, c0)
         # game.update()
-        game.select(r1, c1)
+        # game.select(r1, c1)
+        game.select((Dims.SQUARE_SIZE * c1 + Dims.SQUARE_SIZE // 2, Dims.SQUARE_SIZE * r1 + Dims.SQUARE_SIZE // 2))
 
     def getSuccessors(self, boardConfig, id):
         op = None
@@ -39,11 +43,11 @@ class AI:
         else: op = 'W'
         configs = []
         
-        initPositions = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == id]
-        # self.boardAI.simpleBoard =  [list(x) for x in boardConfig]
+        initPositions = [(r, c) for c in range(self.dim) for r in range(self.dim) if boardConfig[r][c] == id]
+        
         for pos in initPositions:
             r0, c0 = pos 
-            # for pos2 in self.boardAI.getValidMoves(r0, c0):
+        
             for pos2 in self.getValidMoves(r0, c0, boardConfig):
                 dummy = [list(x) for x in boardConfig]
                 r1, c1 = pos2
@@ -61,8 +65,7 @@ class AI:
         return boardConfig
     
     def alphaBetaMax(self, depth, boardConfig, alpha, beta):
-        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
-        hasWon, who = self.boardAI.winner()
+        hasWon, who = self.winner(boardConfig)
         if depth == 0 or hasWon:  
             return self.eval(boardConfig, depth), boardConfig 
         maxv = -inf
@@ -78,8 +81,7 @@ class AI:
         return maxv, newBoard
     
     def alphaBetaMin(self, depth, boardConfig, alpha, beta):
-        self.boardAI.simpleBoard = [list(x) for x in boardConfig]
-        hasWon, who = self.boardAI.winner()
+        hasWon, who = self.winner(boardConfig)
         if depth == 0 or hasWon:  
             return self.eval(boardConfig, depth), boardConfig 
         minv = inf
@@ -96,19 +98,17 @@ class AI:
         
     
     def eval(self, boardConfig, depth):
-        whitePieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'W']
-        blackPieces = [(r, c) for c in range(COLS) for r in range(ROWS) if boardConfig[r][c] == 'B']
+        whitePieces = [(r, c) for c in range(self.dim) for r in range(self.dim) if boardConfig[r][c] == 'W']
+        blackPieces = [(r, c) for c in range(self.dim) for r in range(self.dim) if boardConfig[r][c] == 'B']
         # -------------------------check winner-------------------------
         NoofWhitePieces = len(whitePieces)
         NoofBlackPieces = len(blackPieces)
-        hasWon, who = self.winner(boardConfig, NoofWhitePieces, NoofBlackPieces)
+        hasWon, who = self.winner(boardConfig)
         if who == WHITEID:
-            # printBoard(boardConfig)
-            # print(who, " might win")
+
             return 10000 + depth
         elif who == BLACKID:
-            # printBoard(boardConfig)
-            # print(who, " might win")
+
             return -10000 - depth
         # --------------------------------heuristic starts---------------------------
         score = 0
@@ -125,7 +125,7 @@ class AI:
         score += (densityB - densityW)*10
         # -------------------------calculate area-----------------------
         wx0 = wy1 = bx0 = by1 = -1
-        wy0 = wx1 = by0 = bx1 = ROWS+1
+        wy0 = wx1 = by0 = bx1 = self.dim+1
         posn = 0
         t = 0
         for row in boardConfig:
@@ -147,8 +147,8 @@ class AI:
         areaB = abs(bx0-bx1) * abs(by1-by0)
         score += (areaB - areaA)*10
         # ---------------pieceSQuareTable--------------------------------
-        whitePieceVal = sum(pieceSquaretable[r][c] for (r, c) in whitePieces)
-        blackPieceVal = sum(pieceSquaretable[r][c] for (r, c) in blackPieces)
+        whitePieceVal = sum(Dims.pieceSquaretable[r][c] for (r, c) in whitePieces)
+        blackPieceVal = sum(Dims.pieceSquaretable[r][c] for (r, c) in blackPieces)
         score += (whitePieceVal - blackPieceVal)*2
         
         return score
@@ -184,7 +184,7 @@ class AI:
         dy = DIRY[direction]
         currRow += dx
         currCol += dy
-        while withinBoard(currRow, currCol):
+        while self.withinBoard(currRow, currCol):
             if boardConfig[currRow][currCol] != '_':
                 numbers += 1
             currRow = currRow + dx
@@ -206,11 +206,15 @@ class AI:
     def canJump(self, jump, direction, currRow, currCol, id, dx, dy, boardConfig):
         r = currRow + dx*jump
         c = currCol + dy*jump
-        if withinBoard(r, c) and (boardConfig[r][c] == '_' or boardConfig[r][c] != id):
+        if self.withinBoard(r, c) and (boardConfig[r][c] == '_' or boardConfig[r][c] != id):
             return True
         else: return False
     
-    def winner(self, boardConfig, w, b):
+    def winner(self, boardConfig):
+        w = [(r, c) for c in range(self.dim) for r in range(self.dim) if boardConfig[r][c] == 'W']
+        b = [(r, c) for c in range(self.dim) for r in range(self.dim) if boardConfig[r][c] == 'B']
+        w = len(w)
+        b = len(b)
         if w == 1:
             return True, WHITEID
         elif b == 1:
@@ -254,7 +258,7 @@ class AI:
             for di, dj in DIR:
                 dx = i + di
                 dy = j + dj
-                if withinBoard(dx, dy) and (dx, dy) not in visited and boardConfig[dx][dy] == id:
+                if self.withinBoard(dx, dy) and (dx, dy) not in visited and boardConfig[dx][dy] == id:
                     connectedPieces += 1
                     visited.add((dx, dy))
                     stack.append((dx, dy))
@@ -262,19 +266,19 @@ class AI:
     
     def __str__(self):
         str = ""
-        for r in range(ROWS):
-            for c in range(COLS):
+        for r in range(self.dim):
+            for c in range(self.dim):
                 str += self.boardAI.simpleBoard[r][c] + " "
             str += "\n"
         return str 
 
-def withinBoard(r, c):
-    return r >= 0 and r < ROWS and c >= 0 and c < COLS
+    def withinBoard(self, r, c):
+        return r >= 0 and r < self.dim and c >= 0 and c < self.dim
   
-def printBoard(config):
-    str = ""
-    for r in range(ROWS):
-        for c in range(COLS):
-            str += config[r][c] + " "
-        str += "\n"
-    print(str)
+    def printBoard(config):
+        str = ""
+        for r in range(self.dim):
+            for c in range(self.dim):
+                str += config[r][c] + " "
+            str += "\n"
+        print(str)

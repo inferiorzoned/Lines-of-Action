@@ -1,6 +1,6 @@
 # import pygame as pg
 from pygame import draw
-from .constants import SQUARE_SIZE, WHITEID, BLACKID, BLACK, WHITE
+from .constants import WHITEID, BLACKID, BLACK, WHITE, Dims
 
 class Piece:
     PADDING = 17
@@ -16,12 +16,12 @@ class Piece:
         self.calc_pos()
 
     def calc_pos(self):
-        self.x = SQUARE_SIZE * self.col + SQUARE_SIZE // 2
-        self.y = SQUARE_SIZE * self.row + SQUARE_SIZE // 2
+        self.x = Dims.SQUARE_SIZE * self.col + Dims.SQUARE_SIZE // 2
+        self.y = Dims.SQUARE_SIZE * self.row + Dims.SQUARE_SIZE // 2
     
         
     def draw_piece(self, win):
-        rad = SQUARE_SIZE//2 - self.PADDING
+        rad = Dims.SQUARE_SIZE//2 - self.PADDING
         if self.id == WHITEID:
             draw.circle(win, BLACK, (self.x, self.y), rad + self.OUTLINE)    
         else:

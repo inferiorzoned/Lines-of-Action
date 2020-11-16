@@ -3,45 +3,48 @@ from pygame import draw
 from .constants import *
 from .piece import *
 
+
 class Board:
-    def __init__(self):
+    def __init__(self, dim):
         self.boardList2d = []
         self.simpleBoard = []
-        self.blacks_left = self.whites_left = (ROWS - 2)*2
+        self.blacks_left = self.whites_left = (dim - 2)*2
+        self.dim = dim
         self.addPiecesToBoard()
         
     def draw_checkBoard(self, win):
         posn = 0
         for row in self.simpleBoard:
-            if (posn//ROWS)%2 == 0: 
+            if (posn//self.dim)%2 == 0: 
                 c1 = CHECK1
                 c2 = CHECK2
             else:
                 c1 = CHECK2
                 c2 = CHECK1
             for col in row:
-                r = posn//ROWS
-                c = posn%ROWS
+                r = posn//self.dim
+                c = posn%self.dim
                 if c%2 == 0:
-                    draw.rect(win, c1, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                    draw.rect(win, c1, (r*WIDTH//self.dim, c*WIDTH//self.dim, WIDTH//self.dim, WIDTH//self.dim))
                 else:
-                    draw.rect(win, c2, (r*SQUARE_SIZE, c*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE))
+                    draw.rect(win, c2, (r*WIDTH//self.dim, c*WIDTH//self.dim, WIDTH//self.dim, WIDTH//self.dim))
                 posn += 1
+            
                     
     def addPiecesToBoard(self):
-        for r in range(ROWS):
+        for r in range(self.dim):
             self.boardList2d.append([])
             self.simpleBoard.append([])
-            for c in range(COLS):
-                if r == 0 or r == ROWS-1:
-                    if c!=0 and c!=COLS-1:
+            for c in range(self.dim):
+                if r == 0 or r == self.dim-1:
+                    if c!=0 and c!=self.dim-1:
                         p = Piece(r, c, BLACK, BLACKID)
                         simplep = 'B'
                     else:
                         p = -1
                         simplep = '_'        
                 else:
-                    if c==0 or c==COLS-1:
+                    if c==0 or c==self.dim-1:
                         p = Piece(r, c, WHITE, WHITEID)
                         simplep = 'W'
                     else:
@@ -52,8 +55,8 @@ class Board:
     
     def drawUI(self, win):
         self.draw_checkBoard(win)
-        for r in range(ROWS):
-            for c in range(COLS):
+        for r in range(self.dim):
+            for c in range(self.dim):
                 p = self.boardList2d[r][c]
                 if p != -1:
                     p.draw_piece(win)
@@ -92,7 +95,7 @@ class Board:
         dy = DIRY[direction]
         currRow = currRow + dx
         currCol = currCol + dy
-        while withinBoard(currRow, currCol):
+        while self.withinBoard(currRow, currCol):
             if self.simpleBoard[currRow][currCol] != '_':
                 numbers += 1
             currRow = currRow + dx
@@ -102,7 +105,7 @@ class Board:
     def canJump(self, jump, direction, currRow, currCol, id, dx, dy):
         r = currRow + dx*jump
         c = currCol + dy*jump
-        if withinBoard(r, c) and (self.simpleBoard[r][c] == '_' or self.simpleBoard[r][c] != id):
+        if self.withinBoard(r, c) and (self.simpleBoard[r][c] == '_' or self.simpleBoard[r][c] != id):
             return True
         else: return False
     
@@ -174,7 +177,7 @@ class Board:
             for k in range(len(DIRX)):
                 dx = i + DIRX[k]
                 dy = j + DIRY[k]
-                if withinBoard(dx, dy) and (dx, dy) not in visited and self.simpleBoard[dx][dy]!='_' and self.simpleBoard[dx][dy] == id:
+                if self.withinBoard(dx, dy) and (dx, dy) not in visited and self.simpleBoard[dx][dy]!='_' and self.simpleBoard[dx][dy] == id:
                     connectedPieces += 1
                     visited.add((dx, dy))
                     stack.append((dx, dy))
@@ -182,8 +185,8 @@ class Board:
     
     def __str__(self):
         boardConfig = ""
-        for r in range(ROWS):
-            for c in range(COLS):
+        for r in range(self.dim):
+            for c in range(self.dim):
                 if self.boardList2d[r][c] == -1: p = '_ '
                 elif self.boardList2d[r][c].id == BLACKID: p = 'B '
                 else: p = 'W '
@@ -191,5 +194,5 @@ class Board:
             boardConfig += "\n"
         return boardConfig
 
-def withinBoard(r, c):
-    return r >= 0 and r < ROWS and c >= 0 and c < COLS
+    def withinBoard(self, r, c):
+        return r >= 0 and r < self.dim and c >= 0 and c < self.dim
