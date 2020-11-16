@@ -41,8 +41,7 @@ class Game:
             self.drawValidMoves(self.validMoves)
 
         if self.selectedPiece is None:
-            if self.fromPos != None:
-                self.drawMoveLine(self.fromPos, self.toPos)
+            self.drawMoveLine(self.fromPos, self.toPos)
             hasWon, who = self.winner()
             if hasWon:
                 display.update()
@@ -98,11 +97,13 @@ class Game:
                                                sqr + sqr//2), (c * sqr + sqr//2, r * sqr + sqr//2), 8)
 
     def drawMoveLine(self, fromPos, toPos):
-        r0, c0 = fromPos
-        r1, c1 = toPos
-        sqr = Dims.SQUARE_SIZE
-        draw.circle(self.win, BLUELINE, (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 13)
-        draw.line(self.win, BLUELINE, (c0 * sqr + sqr//2, r0 * sqr + sqr//2), (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 8)
+        if fromPos is not None and toPos is not None:
+            r0, c0 = fromPos
+            r1, c1 = toPos
+            sqr = Dims.SQUARE_SIZE
+            draw.circle(self.win, BLUELINE, (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 13)
+            draw.line(self.win, BLUELINE, (c0 * sqr + sqr//2, r0 * sqr + sqr//2), (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 8)    
+        
     
     def select(self, pos):
         if self.gameStarted == False:
@@ -116,8 +117,8 @@ class Game:
                 return 
         r, c = mouseOnBoard(pos)
         if self.selectedPiece is None:
-            self.selectValidPiece(r, c)
-            self.fromPos = (r, c)
+            selected = self.selectValidPiece(r, c)
+            if selected: self.fromPos = (r, c)
         else:
             if (r, c) in self.validMoves:
                 if self.board.getPiece(r, c) != -1 and self.board.getPiece(r, c).id == self.op:
@@ -126,14 +127,16 @@ class Game:
                 self.toPos = (r, c)
                 self.changeTurn()
             elif self.board.boardList2d[r][c] != -1 and self.board.boardList2d[r][c].id == self.selectedPiece.id:
-                self.selectValidPiece(r, c)
-                fromPos = (r, c)
+                selected = self.selectValidPiece(r, c)
+                if selected: self.fromPos = (r, c)
 
     def selectValidPiece(self, r, c):
         p = self.board.getPiece(r, c)
         if p != -1 and p.id == self.turn:
             self.selectedPiece = p
             self.validMoves = self.board.getValidMoves(p.row, p.col)
+            return True
+        return False
 
     def changeTurn(self):
         # print(f"turn changed to {self.op}")
