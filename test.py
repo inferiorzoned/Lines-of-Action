@@ -5,6 +5,7 @@ from copy import deepcopy
 from itertools import chain
 from collections import Counter
 from math import sqrt, hypot
+import numpy as np
 
 CHECK1 = 10
 CHECK2 = 20
@@ -360,6 +361,30 @@ def test30():
     densityB = sum((abs(blackCOMX-r) + abs(blackCOMY-c)) for (r, c) in blackPieces)/ NoofBlackPieces
     score += (densityB - densityW)*10
 
+def test31():
+    b = np.full((8, 8), '_')
+    # print(b)
+def test32():
+    b = np.full((8, 8), '_', dtype='c')
+    # print(b)
+def test33():
+    b = np.empty((8, 8), dtype = 'str')
+    b.fill('_')
+    # print(b)
+# test33 almost 2X faster than test31 faster than test32
+
+npX = np.array(X)
+def test34():
+    whitePieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if npX[r][c] == 2]
+    blackPieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if npX[r][c] == 1]
+def test35():
+    whitePieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if npX[r,c] == 2]
+    blackPieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if npX[r,c] == 1]
+def test36():
+    whitePieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 2]
+    blackPieces = [(r, c) for c in range(ROWS) for r in range(ROWS) if X[r][c] == 1]
+
+
 setup = '''
 from __main__ import test1
 from __main__ import test2
@@ -390,6 +415,15 @@ from __main__ import test27
 from __main__ import test28
 from __main__ import test29
 from __main__ import test30
+from __main__ import test31
+from __main__ import test32
+from __main__ import test33
+from __main__ import test34
+from __main__ import test35
+from __main__ import test36
+# from __main__ import test37
+# from __main__ import test38
+# from __main__ import test39
 '''
         
 t1 = '''test1()'''
@@ -421,10 +455,19 @@ t27 = '''test27()'''
 t28 = '''test28()'''
 t29 = '''test29()'''
 t30 = '''test30()'''
+t31 = '''test31()'''
+t32 = '''test32()'''
+t33 = '''test33()'''
+t34 = '''test34()'''
+t35 = '''test35()'''
+t36 = '''test36()'''
+# t37 = '''test37()'''
+# t38 = '''test38()'''
+# t39 = '''test39()'''
 
-print(timeit.timeit(setup=setup,stmt = t29, number = 100000))
-print(timeit.timeit(setup=setup,stmt = t30, number = 100000))
-# print(timeit.timeit(setup=setup,stmt = t28, number = 100000))
+print(timeit.timeit(setup=setup,stmt = t34, number = 10000))
+print(timeit.timeit(setup=setup,stmt = t35, number = 10000))
+print(timeit.timeit(setup=setup,stmt = t36, number = 10000))
 
 
 

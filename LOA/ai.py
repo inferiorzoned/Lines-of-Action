@@ -8,7 +8,7 @@ from .board import Board
 
 class AI:
     def __init__(self, dim):
-        self.boardAI = Board(dim)
+        # self.boardAI = Board(dim)
         self.depth = 3
         self.ownid = 'W'
         self.opid = 'B'
@@ -16,7 +16,7 @@ class AI:
         pass
 
     def AImove(self, game):
-        self.boardAI.simpleBoard = [list(x) for x in game.board.simpleBoard]
+        self.simpleBoard = [list(x) for x in game.board.simpleBoard]
         # print(self)
     
         afterMoveBoard = self.alphaBetaMiniMax()
@@ -154,7 +154,7 @@ class AI:
         return score
                 
     def getConfig(self):
-        return [list(x) for x in self.boardAI.simpleBoard]
+        return [list(x) for x in self.simpleBoard]
     
     def getValidMoves(self, r, c, boardConfig):
         validPositions = set()
@@ -268,7 +268,7 @@ class AI:
         str = ""
         for r in range(self.dim):
             for c in range(self.dim):
-                str += self.boardAI.simpleBoard[r][c] + " "
+                str += self.simpleBoard[r][c] + " "
             str += "\n"
         return str 
 

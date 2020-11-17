@@ -115,6 +115,7 @@ class Game:
                 self.board = Board(self.dim)
                 self.ai = AI(self.dim)
                 return 
+            return
         r, c = mouseOnBoard(pos)
         if self.selectedPiece is None:
             selected = self.selectValidPiece(r, c)
