@@ -25,8 +25,6 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
-
 I recreated an abstract strategy board game named [Lines of Action](https://cutt.ly/QhTCLUH "Lines of Action-Wikipedia"). It is a zero-sum game which comprises the area of adversarial search in artificial intelligence. 
 
 Features:
