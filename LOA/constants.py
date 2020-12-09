@@ -2,9 +2,7 @@ import pygame as pg
 
 FPS = 60
 
-WIDTH = HEIGHT = 960
-# ROWS = COLS = 6
-# SQUARE_SIZE = WIDTH//COLS
+WIDTH = HEIGHT = 720
 
 BUTTONHEIGHT = 160
 
@@ -66,4 +64,4 @@ DIRY = [0,0,-1,1,-1,1,1,-1]
 DIR = [(-1,0), (1,0), (0,-1), (0,1), (1,-1), (-1,1), (1,1), (-1,-1)]
 
     
-WINS = pg.transform.scale(pg.image.load('wins3.png'), (400, 300))
+WINS = pg.transform.scale(pg.image.load('images/wins3.png'), (WIDTH//2, HEIGHT//3))

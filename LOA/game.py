@@ -69,20 +69,21 @@ class Game:
         print(f"{who} has won the game!")
         sleep(2)
         Surface.fill(self.win, WINBG)
+        sqr = Dims.SQUARE_SIZE
         while True:
             for e in event.get():
                 if e.type == QUIT:
                     sys.exit()
             if who == BLACKID:
                 draw.circle(self.win, WHITE,
-                            (WIDTH//2, HEIGHT//2 - 150), 150+2)
+                            (WIDTH//2, HEIGHT//2 - 150), sqr*1.25+2)
                 draw.circle(self.win, BLACK,
-                            (WIDTH//2, HEIGHT//2 - 150), 150)
+                            (WIDTH//2, HEIGHT//2 - 150), sqr*1.25)
             else:
                 draw.circle(self.win, BLACK,
-                            (WIDTH//2, HEIGHT//2 - 150), 150+2)
+                            (WIDTH//2, HEIGHT//2 - 150), sqr*1.25+2)
                 draw.circle(self.win, WHITE,
-                            (WIDTH//2, HEIGHT//2 - 150), 150)
+                            (WIDTH//2, HEIGHT//2 - 150), sqr*1.25)
             self.win.blit(WINS, ((WIDTH//2 - 200, HEIGHT//2 + 50)))
             display.update()
 
@@ -92,17 +93,17 @@ class Game:
             r, c = move
             sqr = Dims.SQUARE_SIZE
             draw.circle(self.win, REDDIRECTION, (c * sqr +
-                                                 sqr//2, r * sqr + sqr//2), 13)
+                                                 sqr//2, r * sqr + sqr//2), sqr/10)
             draw.line(self.win, REDDIRECTION, (self.selectedPiece.col * sqr + sqr//2, self.selectedPiece.row *
-                                               sqr + sqr//2), (c * sqr + sqr//2, r * sqr + sqr//2), 8)
+                                               sqr + sqr//2), (c * sqr + sqr//2, r * sqr + sqr//2), 7)
 
     def drawMoveLine(self, fromPos, toPos):
         if fromPos is not None and toPos is not None:
             r0, c0 = fromPos
             r1, c1 = toPos
             sqr = Dims.SQUARE_SIZE
-            draw.circle(self.win, BLUELINE, (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 13)
-            draw.line(self.win, BLUELINE, (c0 * sqr + sqr//2, r0 * sqr + sqr//2), (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 8)    
+            draw.circle(self.win, BLUELINE, (c1 * sqr + sqr//2, r1 * sqr + sqr//2), sqr/10)
+            draw.line(self.win, BLUELINE, (c0 * sqr + sqr//2, r0 * sqr + sqr//2), (c1 * sqr + sqr//2, r1 * sqr + sqr//2), 7)    
         
     
     def select(self, pos):
