@@ -79,7 +79,8 @@ python3 main.py
 ```
 Pick a board size 
 
-![Starting page](images/ss1.png)
+<!-- ![Starting page](images/ss1.png) -->
+<img src = "images/ss1.png" width = 400>
 
 Start the game. Black moves first. Human is playing as Black, AI is White.
 Change the following in `constants.py` to change to Human vs Human mode.
@@ -87,11 +88,13 @@ Change the following in `constants.py` to change to Human vs Human mode.
 AImode = False
 ```
 
-![Starting page](images/ss2.png)
+<!-- ![Starting page](images/ss2.png) -->
+<img src = "images/ss2.png" width = 400>
 
 White (AI) eventually wins this game.
 
-![Starting page](images/ss3.png)
+<!-- ![Starting page](images/ss3.png) -->
+<img src = "images/ss3.png" width = 400>
 
 
 
