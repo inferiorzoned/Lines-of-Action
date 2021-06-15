@@ -95,4 +95,9 @@ White (AI) eventually wins this game.
 <img src = "images/ss3.png" width = 400>
 
 
+It's a part of the offline evaluation (assignment) of CSE 408 course in CSE, BUET.
+
+
+
+
 
